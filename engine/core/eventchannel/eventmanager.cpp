@@ -434,8 +434,9 @@ namespace FIFE {
 	}
 
 	void EventManager::processMouseEvent(SDL_Event event) {
-		if(dispatchSdlEvent(event))
-			return;
+		// FIXME Technomage 2011-02-02: Guichan just consumes all mouse events.
+//		if(dispatchSdlEvent(event))
+//			return;
 
 		MouseEvent mouseevt;
 		mouseevt.setSource(this);

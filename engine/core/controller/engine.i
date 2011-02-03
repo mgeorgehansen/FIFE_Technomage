@@ -23,6 +23,32 @@
 #include "controller/engine.h"
 %}
 
+%header %{
+typedef void (*Callback)();
+
+PyObject *prerender_callback = 0;
+PyObject *postrender_callback = 0;
+
+void preRenderCallback() {
+	if (prerender_callback > 0) {
+		PyEval_CallFunction(prerender_callback, "()");
+	}
+}
+void postRenderCallback() {
+	if (postrender_callback > 0) {
+		PyEval_CallFunction(postrender_callback, "()");
+	}
+}
+%}
+
+%typemap(in) PyObject *callback {
+	if (!PyCallable_Check($input)) {
+		PyErr_SetString(PyExc_TypeError, "Need a callable object!");
+		return 0;
+	}
+	$1 = $input;
+}
+
 namespace FIFE {
 
 	class SoundManager;
@@ -96,12 +122,37 @@ namespace FIFE {
 	};
 
 	class Engine {
+	%rename(c_registerPreRenderCallback) registerPreRenderCallback(Callback);
+	%rename(c_registerPostRenderCallback) registerPostRenderCallback(Callback);
+	%rename(registerPreRenderCallback) py_registerPreRenderCallback(PyObject*);
+	%rename(registerPostRenderCallback) py_registerPostRenderCallback(
+		PyObject*);
 	public:
 		Engine();
 		virtual ~Engine();
 		void initializePumping();
 		void finalizePumping();
 		void pump();
+
+		%extend {
+		void py_registerPreRenderCallback(PyObject *callback)
+		{
+			Py_XDECREF(prerender_callback);
+			Py_XINCREF(callback);
+			prerender_callback = callback;
+			$self->registerPreRenderCallback(&preRenderCallback);
+		}
+		
+		void py_registerPostRenderCallback(PyObject *callback)
+		{
+			Py_XDECREF(postrender_callback);
+			Py_XINCREF(callback);
+			postrender_callback = callback;
+			$self->registerPostRenderCallback(&postRenderCallback);
+		}
+		}
+		void registerPreRenderCallback(Callback callback);
+		void registerPostRenderCallback(Callback callback);
 
 		EngineSettings& getSettings();
 		const DeviceCaps& getDeviceCaps() const;

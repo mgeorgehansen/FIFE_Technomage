@@ -42,6 +42,8 @@
 #include "enginesettings.h"
 #include "video/devicecaps.h"
 
+typedef void (*Callback)();
+
 namespace gcn {
 	class Graphics;
 }
@@ -132,6 +134,16 @@ namespace FIFE {
 		 */
 		void pump();
 
+		/** Register a callback function to call before rendering the main
+		 * scene.
+		 */
+		void registerPreRenderCallback(Callback callback);
+
+		/** Register a callback function to call after rendering the main
+		 * scene.
+		 */
+		void registerPostRenderCallback(Callback callback);
+
 		/** Provides access point to the SoundManager
 		 */
 		SoundManager* getSoundManager() const { return m_soundmanager; }
@@ -212,6 +224,9 @@ namespace FIFE {
 		GuiFont* m_defaultfont;
 		Cursor* m_cursor;
 		bool m_destroyed;
+
+		Callback m_prerender_callback;
+		Callback m_postrender_callback;
 
 		EngineSettings m_settings;
 		DeviceCaps m_devcaps;

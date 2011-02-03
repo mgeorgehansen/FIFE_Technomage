@@ -107,6 +107,8 @@ namespace FIFE {
 		m_gui_graphics(0),
 		m_logmanager(0),
 		m_cursor(0),
+		m_prerender_callback(0),
+		m_postrender_callback(0),
 		m_settings(),
 		m_devcaps(),
 		m_changelisteners() {
@@ -363,11 +365,13 @@ namespace FIFE {
 		m_eventmanager->processEvents();
 		m_renderbackend->startFrame();
 		m_timemanager->update();
-
 		if (m_model->getNumMaps() == 0) {
 			m_renderbackend->clearBackBuffer();
 		}
 
+		if (m_prerender_callback != 0) {
+			(*m_prerender_callback)();
+		}
 		m_model->update();
 #ifdef HAVE_OPENGL
 		if (m_settings.getLightingModel() == 1) {
@@ -376,12 +380,23 @@ namespace FIFE {
 #endif
 		m_guimanager->turn();
 		m_cursor->draw();
+		if (m_postrender_callback != 0) {
+			(*m_postrender_callback)();
+		}
 #ifdef HAVE_OPENGL
 		if (m_settings.getLightingModel() == 1) {
 			m_renderbackend->enableLighting();
 		}
 #endif
 		m_renderbackend->endFrame();
+	}
+
+	void Engine::registerPreRenderCallback(Callback callback) {
+		m_prerender_callback = callback;
+	}
+
+	void Engine::registerPostRenderCallback(Callback callback) {
+		m_postrender_callback = callback;
 	}
 
 	void Engine::finalizePumping() {
