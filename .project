@@ -3,7 +3,6 @@
 	<name>fife</name>
 	<comment></comment>
 	<projects>
-		<project>cegui</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -61,7 +60,7 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.fullBuildTarget</key>
-					<value>all</value>
+					<value></value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.stopOnError</key>
